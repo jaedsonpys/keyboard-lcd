@@ -31,6 +31,11 @@ int rows = 1;
 
 bool shiftActive = false;
 
+const int CLOCK = 2;
+const int DATA = 3;
+
+int lastscan = 0;
+
 void setup() {
     Serial.begin(9600);
     
@@ -38,6 +43,34 @@ void setup() {
     lcd.init();
     lcd.backlight();
     lcd.blink();
+
+    // usb setup
+    pinMode(CLOCK, INPUT_PULLUP);
+    pinMode(DATA, INPUT_PULLUP);
+}
+
+int listen() {
+    int scanval = 0;
+
+    for(int i = 0; i < 11; i++) {
+        while(digitalRead(CLOCK));
+        scanval |= digitalRead(DATA) << i;
+        while(digitalRead(CLOCK) == LOW);
+    }
+
+    scanval >>= 1;
+    scanval &= 0xFF;
+    lastscan = scanval;
+
+    if(lastscan != 0xF0 && scanval != 0xF0) {
+        if(keyMap[scanval] == "SHIFT") {
+            shiftActive = true;
+        }
+
+        // Serial.print("scanval: ");
+        // Serial.println(scanval);
+        return scanval;
+    }
 }
 
 void printLCD(String text, bool format=false, int x=0, int y=0) {
