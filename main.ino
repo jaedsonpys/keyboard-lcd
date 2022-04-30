@@ -116,5 +116,9 @@ void printLCD(String text, bool format=false, int x=0, int y=0) {
 }
 
 void loop() {
+    // getting keyboard pressed key code
+    int keycode = listen();
+    
+    printLCD(keyMap[keycode], true);
     delay(180);
 }
